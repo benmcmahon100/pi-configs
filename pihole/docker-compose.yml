@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "8889:80/tcp"
+      - "4443:443/tcp"
+    env_file:
+      - /etc/secrets/pihole.env
+    volumes:
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    networks:
+      vlan:
+        ipv4_address: 192.168.0.31
+    dns:
+      - 127.0.0.1
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.0.0.1
+
+networks:
+  vlan:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
